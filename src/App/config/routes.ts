@@ -10,7 +10,7 @@ export const ROUTES = {
     },
 
     film: {
-        path: "/films/:id",
+        path: "/films/:filmId",
         get: (id: string) => `/films/${id}`,
     },
 

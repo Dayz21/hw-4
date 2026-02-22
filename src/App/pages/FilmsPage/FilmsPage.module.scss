@@ -1,4 +1,5 @@
 @use "@styles/variables";
+@use "@styles/mixins";
 
 .title {
     margin-top: variables.$xl-spacing;
@@ -31,8 +32,13 @@
 
 .films {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
-    gap: variables.$s-spacing variables.$xl-spacing;
+    grid-template-columns: repeat(auto-fill, minmax(325px, 1fr));
+    @include mixins.adaptive(gap,
+        variables.$s-spacing variables.$xxs-spacing,
+        variables.$s-spacing variables.$xs-spacing,
+        variables.$s-spacing variables.$l-spacing,
+        variables.$s-spacing variables.$xl-spacing);
+
     margin-bottom: variables.$xl-spacing;
 }
 

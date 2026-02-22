@@ -13,6 +13,8 @@ import type { FilmType } from "@/api/types/Film";
 
 import styles from "./FilmsPage.module.scss";
 import { CardSkeleton } from "@/components/Card/CardSkeleton";
+import { useNavigate } from "react-router";
+import { ROUTES } from "@/config/routes";
 
 export const FilmsPage: React.FC = () => {
     const [search, setSearch] = useState("");
@@ -92,7 +94,9 @@ export const FilmsPage: React.FC = () => {
         return () => {
             observer.disconnect();
         };
-    })
+    });
+
+    const navigate = useNavigate();
 
     return (
         <>
@@ -132,7 +136,7 @@ export const FilmsPage: React.FC = () => {
                         <Card
                             key={data.id}
                             title={data.title}
-                            description={data.shortDescription}
+                            description={data.description}
                             imageUrl={data.poster.url}
                             genre={data.category.title}
                             releaseYear={data.releaseYear}
@@ -141,7 +145,7 @@ export const FilmsPage: React.FC = () => {
                             timing={data.duration}
                         >
                             <Button onClick={() => {}} outlined>В избранное</Button>
-                            <Button onClick={() => {}}>Смотреть</Button>
+                            <Button onClick={() => navigate(ROUTES.film.get(data.documentId))}>Смотреть</Button>
                         </Card>
                     ))
                     :

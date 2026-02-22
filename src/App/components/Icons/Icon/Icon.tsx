@@ -8,11 +8,12 @@ export type IconProps = React.SVGAttributes<SVGElement> & {
     color?: 'primary' | 'secondary' | 'accent' | 'disabled' | 'original';
     size?: number | string;
     angle?: number;
+    onClick?: () => void;
 };
 
-export const Icon: React.FC<React.PropsWithChildren<IconProps>> = ({ className, color = "primary", size = 24, angle = 0, children }) => {
+export const Icon: React.FC<React.PropsWithChildren<IconProps>> = ({ className, color = "primary", size = 24, angle = 0, onClick, children }) => {
     return (
-        <div className={classNames(styles.icon, styles[color], className)} style={{ height: size, width: size, transform: angle ? `rotate(${angle}deg)` : undefined }}>
+        <div className={classNames(styles.icon, styles[color], className)} style={{ height: size, width: size, transform: angle ? `rotate(${angle}deg)` : undefined }} onClick={onClick}>
             {children}
         </div>
     );

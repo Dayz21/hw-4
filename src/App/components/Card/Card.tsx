@@ -3,9 +3,10 @@ import classNames from "classnames";
 import { Image } from "@components/Image";
 import { Text } from "@components/Text";
 import { StarIcon } from "@components/Icons/StarIcon";
+import { Children } from "react";
+import { getFormattedTime } from "@/utils/getFormattedTime";
 
 import styles from "./Card.module.scss";
-import { Children } from "react";
 
 export type CardProps = {
     className?: string;
@@ -22,9 +23,7 @@ export type CardProps = {
 };
 
 export const Card: React.FC<CardProps> = ({ className, title, description, imageUrl, genre, releaseYear, ageRating, rating, timing, children, onClick }) => {
-    const hours = Math.floor(timing / 60);
-    const minutes = timing % 60;
-    const formattedTiming = `${hours}h ${minutes}m`;
+
 
     return (
         <div className={classNames(styles.card, className)}>
@@ -34,7 +33,7 @@ export const Card: React.FC<CardProps> = ({ className, title, description, image
             </div>
 
             <div className={styles.timing}>
-                <Text view="p-16">{formattedTiming}</Text>
+                <Text view="p-16">{getFormattedTime(timing)}</Text>
             </div>
 
             <Image 

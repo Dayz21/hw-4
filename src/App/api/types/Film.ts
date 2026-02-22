@@ -6,7 +6,7 @@ export type FilmResponseType = {
     documentId: string,
     title: string,
     description: string,
-    shortDescription: string, 
+    shortDescription: string,
     releaseYear: number,
     duration: number,
     rating: number,
@@ -16,7 +16,7 @@ export type FilmResponseType = {
     trailerUrl: string,
     category: CategoryReponseType,
     poster: ImageResponseType,
-    gallery: ImageResponseType[],
+    gallery?: ImageResponseType[],
 };
 
 export type FilmType = {
@@ -24,7 +24,7 @@ export type FilmType = {
     documentId: string,
     title: string,
     description: string,
-    shortDescription: string, 
+    shortDescription: string,
     releaseYear: number,
     duration: number,
     rating: number,
@@ -34,7 +34,7 @@ export type FilmType = {
     trailerUrl: string,
     category: CategoryType,
     poster: ImageType,
-    gallery: ImageType[],
+    gallery?: ImageType[],
 };
 
 export const toFilmType = (response: FilmResponseType): FilmType => ({
@@ -52,5 +52,5 @@ export const toFilmType = (response: FilmResponseType): FilmType => ({
     trailerUrl: response.trailerUrl,
     category: toCategoryType(response.category),
     poster: toImageType(response.poster),
-    gallery: response.gallery.map(toImageType),
+    gallery: response.gallery?.map(toImageType),
 });

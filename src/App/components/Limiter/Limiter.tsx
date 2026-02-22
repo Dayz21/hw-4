@@ -6,15 +6,11 @@ import styles from "./Limiter.module.scss";
 export type LimiterProps = {
     children: React.ReactNode;
     className?: string;
-    maxWidth?: number | string;
 };
 
-export const Limiter: React.FC<LimiterProps> = ({ children, className, maxWidth = 1440 }) => {
+export const Limiter: React.FC<LimiterProps> = ({ children, className }) => {
     return (
-        <div 
-            className={classNames(styles.limiter, className)}
-            style={{maxWidth}}
-        >
+        <div className={classNames(styles.limiter, className)}>
             {children}
         </div>
     )

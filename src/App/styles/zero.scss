@@ -72,6 +72,11 @@ body {
     background-color: colors.$bg-color;
 }
 
+a {
+    color: inherit;
+    text-decoration: none;
+}
+
 #root {
     min-height: 100vh;
 }
