@@ -42,7 +42,12 @@
 
 .brief {
     display: flex;
-    gap: variables.$xs-spacing;
+    @include mixins.adaptive(gap,
+        variables.$xxs-spacing,
+        variables.$xs-spacing,
+        variables.$xs-spacing,
+        variables.$xs-spacing,
+    );
 }
 
 
