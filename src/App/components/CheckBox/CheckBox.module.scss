@@ -1,10 +1,11 @@
 @use "@styles/colors";
+@use "@styles/variables";
 
 .checkbox_container {
     position: relative;
     width: 40px;
     height: 40px;
-    border-radius: 6px;
+    border-radius: variables.$border-radius;
     background-color: colors.$checkbox-bg-color;
     border: 1px solid colors.$checkbox-border-color;
     transition: background-color 0.3s, border-color 0.3s;

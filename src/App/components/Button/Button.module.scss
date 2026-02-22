@@ -5,9 +5,9 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
+    gap: variables.$xxs-spacing;
     padding: 16px 31px;
-    border-radius: 6px;
+    border-radius: variables.$border-radius;
     outline: none;
     border: 1px solid colors.$button-bg-color;
     background-color: colors.$button-bg-color;

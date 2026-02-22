@@ -1,0 +1,46 @@
+@use "@styles/variables";
+
+.title {
+    margin-top: variables.$xl-spacing;
+    margin-bottom: variables.$s-spacing;
+}
+
+.subtitle {
+    margin-bottom: variables.$xl-spacing;
+}
+
+.search {
+    display: grid;
+    grid-template-columns: auto max-content;
+    gap: variables.$m-spacing;
+    margin-bottom: variables.$s-spacing;
+}
+
+.filters {
+    display: flex;
+    gap: variables.$xs-spacing;
+    margin-bottom: variables.$l-spacing;
+}
+
+.films_title {
+    display: flex;
+    align-items: center;
+    gap: variables.$s-spacing;
+    margin-bottom: variables.$m-spacing;
+}
+
+.films {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+    gap: variables.$s-spacing variables.$xl-spacing;
+    margin-bottom: variables.$xl-spacing;
+}
+
+.trigger {
+    width: 100%;
+    height: 800px;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    pointer-events: none;
+}

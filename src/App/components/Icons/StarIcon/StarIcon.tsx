@@ -4,8 +4,8 @@ import { Icon, type IconProps } from '../Icon';
 export const StarIcon: React.FC<IconProps> = (props) => {
     return (
         <Icon {...props}>
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+            <svg width="100%" height="100%" viewBox="0 0 19 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M9.08336 0.75L11.6584 5.96667L17.4167 6.80833L13.25 10.8667L14.2334 16.6L9.08336 13.8917L3.93336 16.6L4.9167 10.8667L0.750031 6.80833L6.50836 5.96667L9.08336 0.75Z" fill="#F5C518" stroke="#F5C518" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
         </Icon>
     )

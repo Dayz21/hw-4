@@ -8,16 +8,17 @@ export type CheckBoxProps = Omit<
   React.InputHTMLAttributes<HTMLInputElement>,
   'onChange'
 > & {
+    size?: number | string;
     className?: string;
     checked: boolean;
     onChange: (checked: boolean) => void;
 };
 
-export const CheckBox: React.FC<CheckBoxProps> = ({ className, checked, onChange, ...props }) => {
+export const CheckBox: React.FC<CheckBoxProps> = ({ className, checked, onChange, size, ...props }) => {
     const id = useId();
     return (
-        <label htmlFor={id} className={classNames(styles.checkbox_container, className, { [styles.checked]: checked, [styles.disabled]: props.disabled })}>
-            <CheckIcon className={styles.check_icon} color={props.disabled ? "disabled" : "accent"} size={40} />
+        <label htmlFor={id} className={classNames(styles.checkbox_container, className, { [styles.checked]: checked, [styles.disabled]: props.disabled })} style={{ width: size, height: size }}>
+            <CheckIcon className={styles.check_icon} color={props.disabled ? "disabled" : "accent"} size={size || 40} />
             <input
                 id={id}
                 disabled={props.disabled}

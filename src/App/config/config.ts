@@ -1,0 +1,1 @@
+export const COUNT_OF_FILMS_ON_PAGE = 9;

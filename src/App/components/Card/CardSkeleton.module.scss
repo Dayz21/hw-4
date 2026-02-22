@@ -1,0 +1,96 @@
+@use "@styles/colors";
+@use "@styles/variables";
+
+.card_skeleton {
+    background-color: colors.$card-bg-color;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    border-radius: variables.$border-radius;
+    overflow: hidden;
+    align-items: stretch;
+}
+
+.image_skeleton {
+    overflow: hidden;
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1;
+    background-color: colors.$skeleton-bg-color;
+}
+
+.info_skeleton {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: variables.$l-spacing variables.$xs-spacing;
+    flex: 1 1 auto;
+}
+
+.title_skeleton {
+    overflow: hidden;
+    position: relative;
+    width: 100%;
+    height: 43px;
+    background-color: colors.$skeleton-bg-color;
+}
+
+.description_skeleton {
+    overflow: hidden;
+    position: relative;
+    width: 100%;
+    height: 15px;
+    background-color: colors.$skeleton-bg-color;
+}
+
+.brief_skeleton {
+    overflow: hidden;
+    position: relative;
+    width: 70%;
+    height: 18px;
+    background-color: colors.$skeleton-bg-color;
+    margin: 0 auto;
+    margin-bottom: 8px;
+}
+
+.buttons_skeleton {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    margin-top: 12px;
+    gap: 30px;
+    background-color: transparent;
+}
+
+.button_skeleton {
+    overflow: hidden;
+    position: relative;
+    width: 100%;
+    height: 52px;
+    background-color: colors.$skeleton-bg-color;
+    border-radius: variables.$border-radius;
+}
+
+.image_skeleton::before,
+.brief_skeleton::before,
+.title_skeleton::before,
+.description_skeleton::before,
+.button_skeleton::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 75%;
+    height: 100%;
+    background: colors.$skeleton-gradient;
+    animation: skeletonLoading both 1s linear infinite;
+}
+
+@keyframes skeletonLoading {
+    from {
+        transform: translateX(-200%);
+    }
+
+    to {
+        transform: translateX(200%);
+    }
+}

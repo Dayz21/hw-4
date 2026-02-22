@@ -1,15 +1,17 @@
 @use "@styles/colors";
+@use "@styles/variables";
 
 .input_container {
     display: flex;
-    gap: 8px;
+    gap: variables.$xxs-spacing;
     align-items: center;
     padding: 14px 11px;
+    min-width: 300px;
     cursor: text;
 
     background-color: colors.$input-bg-color;
     border: 1px solid colors.$input-border-color;
-    border-radius: 6px;
+    border-radius: variables.$border-radius;
 
     transition: border-color 0.3s;
 

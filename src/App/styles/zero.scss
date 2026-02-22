@@ -69,11 +69,11 @@ h6 {
 html,
 body {
     min-height: 100vh;
+    background-color: colors.$bg-color;
 }
 
 #root {
     min-height: 100vh;
-    background-color: colors.$bg-color;
 }
 
 * {
@@ -84,4 +84,26 @@ body {
     font-style: normal;
     font-variation-settings:
         "wdth" 100;
+}
+
+::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: colors.$accent-color;
+    border-radius: 6px;
+    border: 3px solid transparent;
+    background-clip: padding-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: colors.$active-accent-color;
+    border: 3px solid transparent;
+    background-clip: padding-box;
 }

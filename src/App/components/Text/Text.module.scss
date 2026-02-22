@@ -5,7 +5,7 @@
     -webkit-box-orient: vertical;
     overflow: hidden;
     text-overflow: ellipsis;
-    transition: color .3s;
+    transition: color .3s, font-weight .3s, font-size .3s;
 }
 
 .title {
