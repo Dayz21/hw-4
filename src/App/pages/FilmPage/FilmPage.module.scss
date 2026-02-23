@@ -11,7 +11,7 @@
     display: grid;
     grid-template-columns: auto 390px;
     gap: variables.$m-spacing;
-    margin-bottom: variables.$l-spacing;
+    margin-bottom: variables.$xl-spacing;
 
     @media screen and (max-width: 1024px) {
         grid-template-columns: auto;
@@ -87,4 +87,8 @@
 .recomendations {
     display: flex;
     gap: variables.$xl-spacing;
+}
+
+.images_slider_container {
+    margin-bottom: variables.$xl-spacing;
 }

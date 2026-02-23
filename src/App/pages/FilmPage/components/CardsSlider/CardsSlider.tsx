@@ -5,11 +5,11 @@ import { SwiperSlide } from "swiper/react";
 import { Card } from "@/components/Card/Card";
 import { Button } from "@/components/Button/Button";
 import { useRef } from "react";
-import { ArrowRightIcon } from "@/components/Icons/ArrowRightIcon";
+import { CardSkeleton } from "@/components/Card/CardSkeleton";
+import { BackControlButton, FrontControlButton } from "../ControlButtons/ControlButtons";
 
 import "swiper/css";
 import styles from "./CardsSlider.module.scss";
-import { CardSkeleton } from "@/components/Card/CardSkeleton";
 
 type CardsSliderProps = {
     cards: FilmType[];
@@ -67,13 +67,8 @@ export const CardsSlider: React.FC<CardsSliderProps> = ({ cards, onCardClick }) 
                 }
             </Swiper>
 
-            <button onClick={() => swiperRef.current?.slidePrev()} className={styles.nav_button_left}>
-                <ArrowRightIcon size={30} angle={180} />
-            </button>
-
-            <button onClick={() => swiperRef.current?.slideNext()} className={styles.nav_button_right}>
-                <ArrowRightIcon size={30} />
-            </button>
+            <BackControlButton onClick={() => swiperRef.current?.slidePrev()} />
+            <FrontControlButton onClick={() => swiperRef.current?.slideNext()} />
         </div>
     );
 }

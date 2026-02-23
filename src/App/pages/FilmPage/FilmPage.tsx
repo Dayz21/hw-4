@@ -12,6 +12,7 @@ import { CardsSlider } from "./components/CardsSlider";
 import type { FilmType } from "@/api/types/Film";
 
 import styles from "./FilmPage.module.scss";
+import { ImagesSlider } from "./components/ImagesSlider";
 
 
 
@@ -36,6 +37,13 @@ export const FilmPage: React.FC = () => {
             .then(({ films }) => setRecommendations(films))
             .catch(console.error);
     }, []);
+
+    useEffect(() => {
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        });
+    }, [film]);
 
     return (
         <>
@@ -91,6 +99,12 @@ export const FilmPage: React.FC = () => {
                 </div>
             </div>
 
+            <div className={styles.images_slider_container}>
+                <Text view="subtitle" weight="bold" className={styles.recomendations_title}>Галерея</Text>
+
+                <ImagesSlider images={film?.gallery?.map((image) => image.url) || []} />
+            </div>
+
             <div className={styles.recomendations_container}>
                 <Text view="subtitle" weight="bold" className={styles.recomendations_title}>Рекомендации</Text>
                     
@@ -100,10 +114,6 @@ export const FilmPage: React.FC = () => {
                         if (film.documentId === filmId) return;
                         setFilm(null);
                         navigate(ROUTES.film.get(film.documentId));
-                        window.scrollTo({
-                            top: 0,
-                            behavior: 'smooth'
-                        });
                     }} 
                 />
             </div>
