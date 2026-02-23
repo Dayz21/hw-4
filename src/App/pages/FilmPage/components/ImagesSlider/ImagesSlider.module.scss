@@ -1,0 +1,13 @@
+@use "@styles/variables";
+@use "@styles/mixins";
+
+.image {
+    border-radius: variables.$border-radius;
+    cursor: pointer;
+}
+
+.image_skeleton {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    @include mixins.skeleton;
+}
