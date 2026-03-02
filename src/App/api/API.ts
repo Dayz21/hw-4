@@ -4,14 +4,14 @@ import axios from "axios";
 class APIClass {
     private client: AxiosInstance;
 
-    constructor(baseURL: string) {        
+    constructor(baseURL: string) {
         this.client = axios.create({
             baseURL
         });
 
         this.client.interceptors.request.use((config) => {
             const token = localStorage.getItem("token");
-            
+
             if (token) {
                 config.headers.Authorization = `Bearer ${token}`;
             }
@@ -27,7 +27,7 @@ class APIClass {
     async delete(path: string, config?: AxiosRequestConfig) {
         return await this.client.delete(path, config);
     }
-    
+
     async post(path: string, data?: unknown, config?: AxiosRequestConfig) {
         return await this.client.post(path, data, config);
     }

@@ -1,49 +1,46 @@
 import { useNavigate, useParams } from "react-router";
 import { BackButton } from "./components/BackButton";
 import { ROUTES } from "@/config/routes";
-import { useEffect, useState } from "react";
-import { FilmsAPI } from "@/api/FilmsAPI";
+import { useEffect } from "react";
 import { StarIcon } from "@/components/Icons/StarIcon/StarIcon";
 import { Text } from "@/components/Text";
 import { getFormattedTime } from "@/utils/getFormattedTime";
 import { VideoFrame } from "@/components/VideoFrame";
-import { COUNT_OF_RECOMMENDATIONS } from "@/config/config";
-import { CardsSlider } from "./components/CardsSlider";
-import type { FilmType } from "@/api/types/Film";
+import { FilmsCarousel } from "@/components/FilmsCarousel";
+import { ImagesSlider } from "./components/ImagesSlider";
+import { useLocalStore } from "@/hooks/useLocalStore";
+import { FilmStore } from "@/store/FilmStore";
+import { observer } from "mobx-react-lite";
+import { Button } from "@/components/Button";
+import { rootStore } from "@/store/rootStore";
 
 import styles from "./FilmPage.module.scss";
-import { ImagesSlider } from "./components/ImagesSlider";
 
 
-
-export const FilmPage: React.FC = () => {
+export const FilmPage: React.FC = observer(() => {
     const navigate = useNavigate();
     const { filmId } = useParams();
-    const [film, setFilm] = useState<FilmType | null>(null);
+    const filmStore = useLocalStore(() => new FilmStore());
 
     useEffect(() => {
         if (!filmId) return;
+        filmStore.fetchFilm(filmId);
+    }, [filmId, filmStore]);
 
-        FilmsAPI
-            .fetchFilmById(filmId)
-            .then(setFilm)
-            .catch(console.error);
-    }, [filmId]);
-
-    const [recommendations, setRecommendations] = useState<FilmType[]>([]);
     useEffect(() => {
-        FilmsAPI
-            .fetchFilms(1, COUNT_OF_RECOMMENDATIONS, undefined, undefined, true)
-            .then(({ films }) => setRecommendations(films))
-            .catch(console.error);
-    }, []);
+        filmStore.fetchRecommendations();
+    }, [filmStore]);
 
     useEffect(() => {
         window.scrollTo({
             top: 0,
             behavior: 'smooth'
         });
-    }, [film]);
+    }, [filmStore.film]);
+    
+    const film = filmStore.film;
+    const recommendations = filmStore.recommendations;
+    const isAuthorized = rootStore.userStore.isAuthorized;
 
     return (
         <>
@@ -68,6 +65,14 @@ export const FilmPage: React.FC = () => {
                         :
                         <div className={styles.title_skeleton} />
                     }
+
+                    {film !== null && isAuthorized && (
+                        <div className={styles.actions}>
+                            <Button onClick={() => rootStore.favoritesStore.toggleFavorite(film.id)} outlined>
+                                {rootStore.favoritesStore.contains(film.id) ? "В избранном" : "В избранное"}
+                            </Button>
+                        </div>
+                    )}
 
                     {
                         film !== null ?
@@ -108,15 +113,15 @@ export const FilmPage: React.FC = () => {
             <div className={styles.recomendations_container}>
                 <Text view="subtitle" weight="bold" className={styles.recomendations_title}>Рекомендации</Text>
                     
-                <CardsSlider 
-                    cards={recommendations}
-                    onCardClick={(film) => {
+                <FilmsCarousel
+                    films={recommendations}
+                    onFilmClick={(film) => {
                         if (film.documentId === filmId) return;
-                        setFilm(null);
+                        filmStore.resetFilm();
                         navigate(ROUTES.film.get(film.documentId));
                     }} 
                 />
             </div>
         </>
     );
-}
+});

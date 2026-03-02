@@ -14,9 +14,9 @@ export const ROUTES = {
         get: (id: string) => `/films/${id}`,
     },
 
-    newItems: {
-        path: "/new",
-        get: () => "/new",
+    recommendations: {
+        path: "/recommendations",
+        get: () => "/recommendations",
     },
 
     collections: {
@@ -32,5 +32,15 @@ export const ROUTES = {
     favorites: {
         path: "/favorites",
         get: () => "/favorites",
+    },
+
+    login: {
+        path: "/login",
+        get: () => "/login",
+    },
+
+    register: {
+        path: "/register",
+        get: () => "/register",
     }
 }

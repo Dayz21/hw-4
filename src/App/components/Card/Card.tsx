@@ -3,7 +3,6 @@ import classNames from "classnames";
 import { Image } from "@components/Image";
 import { Text } from "@components/Text";
 import { StarIcon } from "@components/Icons/StarIcon";
-import { Children } from "react";
 import { getFormattedTime } from "@/utils/getFormattedTime";
 
 import styles from "./Card.module.scss";
@@ -58,7 +57,7 @@ export const Card: React.FC<CardProps> = ({ className, title, description, image
                     <Text view="p-16" maxLines={3} className={styles.description}>{description}</Text>
                 </div>
 
-                {children && <div className={styles.actions} style={{gridTemplateColumns: `repeat(${Children.count(children)}, auto)`}}>{children}</div>}
+                {children && <div className={styles.actions}>{children}</div>}
             </div>
 
         </div>

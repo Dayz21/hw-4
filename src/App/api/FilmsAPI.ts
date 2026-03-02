@@ -1,14 +1,28 @@
 import type { Option } from "@/components/MultiDropdown/MultiDropdown";
+import { toFilmType, type FilmType } from "@/store/models/Film";
+import { toPaginationType, type PaginationType } from "@/store/models/Pagination";
 import { API } from "./API";
-import { toFilmType, type FilmType } from "./types/Film";
 import qs from "qs";
 
+export type FetchFilmsProps = {
+    page: number,
+    pageSize: number,
+    categories?: Option[],
+    search?: string,
+    isFeatured?: boolean
+};
+
+export type FetchFilmsResponse = {
+    films: FilmType[],
+    pagination: PaginationType,
+}
+
 class FilmsAPIClass {
-    async fetchFilms(page: number, pageSize: number, categories?: Option[], search?: string, isFeatured?: boolean): Promise<{ films: FilmType[], total: number }> {
+    async fetchFilms(props: FetchFilmsProps): Promise<FetchFilmsResponse> {
         const query = qs.stringify({
             pagination: {
-                page,
-                pageSize
+                page: props.page,
+                pageSize: props.pageSize
             },
             populate: [
                 "category",
@@ -16,21 +30,21 @@ class FilmsAPIClass {
             ],
             filters: {
                 title: {
-                    $containsi: search,
+                    $containsi: props.search,
                 },
                 category: {
                     documentId: {
-                        $in: categories?.map(category => category.key),
+                        $in: props.categories?.map(category => category.key),
                     }
                 },
-                isFeatured: isFeatured !== undefined ? { $eq: isFeatured } : undefined,
+                ...(props.isFeatured !== undefined && { isFeatured: { $eq: props.isFeatured } }),
             }
-        });
+        }, { skipNulls: true });
 
         const response = await API.get(`/films?${query}`);
         return {
             films: response.data.data.map(toFilmType),
-            total: response.data.meta.pagination.total,
+            pagination: toPaginationType(response.data.meta.pagination),
         };
     }
 

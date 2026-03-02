@@ -10,6 +10,7 @@
     transition: background-color 0.3s, border-color 0.3s;
     overflow: hidden;
     border-radius: variables.$border-radius;
+    height: variables.$card-height; // для react-window задаю фиксированную высоту, хз как по-другому сделать
 
     &:hover {
         background-color: colors.$card-hover-bg-color;
@@ -60,8 +61,13 @@
 }
 
 .actions {
-    display: grid;
+    display: flex;
+    align-items: center;
     gap: variables.$xxs-spacing;
+}
+
+.actions * {
+    flex: 1 1 auto;
 }
 
 .info_container {

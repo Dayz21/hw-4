@@ -58,3 +58,9 @@
 .with_after_slot {
     padding: 13px 11px;
 }
+
+.label {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}

@@ -30,23 +30,18 @@
     margin-bottom: variables.$m-spacing;
 }
 
-.films {
+.films_row,
+.films_skeleton {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(325px, 1fr));
-    @include mixins.adaptive(gap,
-        variables.$s-spacing variables.$xxs-spacing,
-        variables.$s-spacing variables.$xs-spacing,
-        variables.$s-spacing variables.$l-spacing,
-        variables.$s-spacing variables.$xl-spacing);
 
-    margin-bottom: variables.$xl-spacing;
+    @include mixins.adaptive(gap,
+        variables.$xs-spacing variables.$xxs-spacing,
+        variables.$xs-spacing variables.$xs-spacing,
+        variables.$xs-spacing variables.$l-spacing,
+        variables.$xs-spacing variables.$xl-spacing );
 }
 
-.trigger {
-    width: 100%;
-    height: 800px;
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    pointer-events: none;
+.films {
+    margin-bottom: variables.$xl-spacing;
 }

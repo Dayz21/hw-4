@@ -2,101 +2,106 @@ import { Text } from "@/components/Text";
 import { Input } from "@/components/Input";
 import { Button } from "@/components/Button";
 import { MultiDropdown } from "@/components/MultiDropdown";
-import { useEffect, useState, useRef } from "react";
-import { FilmsAPI } from "@/api/FilmsAPI";
-import { Card } from "@/components/Card";
-import { CategoriesAPI } from "@/api/CategoriesAPI";
-import { toOptionType } from "@/api/types/Category";
-import { COUNT_OF_FILMS_ON_PAGE } from "@/config/config";
+import { useEffect, useState } from "react";
+import { FilmsWindow } from "./FilmsWIndow";
+import { useLocalStore } from "@/hooks/useLocalStore";
+import { FilmsStore } from "@/store/FilmsStore";
+import { observer } from "mobx-react-lite";
+import { useInfinityScroll } from "@/hooks/useInfinityScroll";
+import { useSearchParams } from "react-router";
+import { reaction, type IReactionDisposer } from "mobx";
 import type { Option } from "@/components/MultiDropdown/MultiDropdown";
-import type { FilmType } from "@/api/types/Film";
 
 import styles from "./FilmsPage.module.scss";
-import { CardSkeleton } from "@/components/Card/CardSkeleton";
-import { useNavigate } from "react-router";
-import { ROUTES } from "@/config/routes";
 
-export const FilmsPage: React.FC = () => {
+
+export const FilmsPage = observer(() => {
+    const filmsStore = useLocalStore(() => new FilmsStore());
+    const [searchParams, setSearchParams] = useSearchParams();
+    const searchParamsKey = searchParams.toString();
+
     const [search, setSearch] = useState("");
-    const curSearch = useRef("");
 
-    const [options, setOptions] = useState<Option[]>([]);
-    const [filters, setFilters] = useState<Option[]>([]);
     useEffect(() => {
-        CategoriesAPI
-            .fetchCategories()
-            .then(categories => setOptions(categories.map(toOptionType)))
-            .catch(console.error);
-    }, []);
+        let cancelled = false;
+        let dispose: IReactionDisposer | undefined;
 
+        (async () => {
+            await filmsStore.fetchCategories();
+            if (cancelled) return;
 
-    const page = useRef(1);
-    const [totalFilms, setTotalFilms] = useState(0);
-    const [films, setFilms] = useState<FilmType[]>([]);
-    const [loading, setLoading] = useState(true);
-    
-    useEffect(() => {
-        FilmsAPI
-            .fetchFilms(page.current, COUNT_OF_FILMS_ON_PAGE)
-            .then(({ films, total }) => {
-                setFilms(films);
-                setTotalFilms(total);
-            })
-            .catch(console.error)
-            .finally(() => setLoading(false));
-    }, []);
-    
-    const fetchFilms = (filters?: Option[], search?: string, reset: boolean = false) => {
-        FilmsAPI
-            .fetchFilms(page.current, COUNT_OF_FILMS_ON_PAGE, filters, search)
-            .then(({ films, total }) => {
-                setFilms(prev => reset ? films : [...prev, ...films]);
-                setTotalFilms(total);
-            })
-            .catch(console.error);
-    }
+            dispose = reaction(
+                () => filmsStore.categories,
+                async (availableCategories) => {
+                    if (cancelled) return;
 
-    const onSearch = () => {
-        page.current = 1;
-        curSearch.current = search;
+                    const params = new URLSearchParams(searchParamsKey);
 
-        setLoading(true);
-        fetchFilms(filters, search, true);
-        setLoading(false);
-    }
+                    const searchQuery = params.get("search") || "";
+                    const categoriesQuery = params.get("categories") || "";
+                    const categoryKeys = categoriesQuery ? categoriesQuery.split(",").filter(Boolean) : [];
 
-    const onSetFilters = (filters: Option[]) => {
-        page.current = 1;
-        setFilters(filters);
+                    const categoryByKey = new Map(availableCategories.map((c) => [c.key, c] as const));
+                    const validatedCategories = categoryKeys
+                    .map((key) => categoryByKey.get(key))
+                    .filter((v): v is Option => v !== undefined);
 
-        setLoading(true);
-        fetchFilms(filters, curSearch.current, true);
-        setLoading(false);
-    }
-    
-    const triggerRef = useRef<HTMLDivElement>(null);
-    useEffect(() => {
-        const observer = new IntersectionObserver(entries => {
-            if (entries[0].isIntersecting && films.length >= page.current * COUNT_OF_FILMS_ON_PAGE) {
-                page.current += 1;
-                fetchFilms(filters, curSearch.current);
-            }
-        }, {
-            root: null,
-            rootMargin: "0px",
-            threshold: 0.1
-        });
-        
-        if (triggerRef.current) {
-            observer.observe(triggerRef.current);
-        }
+                    setSearch(searchQuery);
+                    filmsStore.setSearchText(searchQuery);
+                    filmsStore.setFilters(validatedCategories);
+
+                    await filmsStore.fetchFilms();
+                },
+                { fireImmediately: true }
+            );
+        })();
 
         return () => {
-            observer.disconnect();
+            cancelled = true;
+            dispose?.();
         };
-    });
+    }, [filmsStore, searchParamsKey]);
 
-    const navigate = useNavigate();
+    useEffect(() => {
+        if ('scrollRestoration' in window.history) {
+            window.history.scrollRestoration = 'manual';
+        }
+        window.scrollTo(0, 0);
+    }, []);
+
+    const handleSearch = () => {
+        setSearchParams(
+            (prev) => {
+                const next = new URLSearchParams(prev);
+                const normalized = search.trim();
+
+                if (normalized) next.set("search", normalized);
+                else next.delete("search");
+
+                return next;
+            },
+            { replace: true }
+        );
+    };
+
+    const handleSetFilters = (filters: Option[]) => {
+        setSearchParams(
+            (prev) => {
+                const next = new URLSearchParams(prev);
+                const categories = filters.map((f) => f.key).filter(Boolean);
+
+                if (categories.length > 0) next.set("categories", categories.join(","));
+                else next.delete("categories");
+
+                return next;
+            },
+            { replace: true }
+        );
+    };
+
+    const trigger = useInfinityScroll(() => filmsStore.fetchNextFilms());
+    const categories = filmsStore.categories;
+    const selected = filmsStore.selectedCategories;
 
     return (
         <>
@@ -105,57 +110,33 @@ export const FilmsPage: React.FC = () => {
             </Text>
             
             <Text view="p-20" tag="h2" color="secondary" className={styles.subtitle}>
-                Подборка для вечера уже здесь: фильмы, сериалы и новинки. <br/> 
+                Подборка для вечера уже здесь: фильмы, сериалы и рекомендации. <br/> 
                 Найди что посмотреть — за пару секунд.
             </Text>
 
             <div className={styles.search}>
                 <Input value={search} onChange={setSearch} placeholder="Искать фильм" />
-                <Button onClick={onSearch} >Найти</Button>
+                <Button onClick={handleSearch} >Найти</Button>
             </div>
 
             <div className={styles.filters}>
                 <MultiDropdown
-                    options={options}
+                    options={categories}
                     getTitle={(value) => value.map(el => el.value).join(", ")}
-                    value={filters}
-                    onChange={onSetFilters}
+                    value={selected}
+                    onChange={handleSetFilters}
                     placeholder="Жанры"
                 />
             </div>
 
             <div className={styles.films_title}>
                 <Text view="subtitle" weight="bold">Все фильмы</Text>
-                <Text view="p-20" color="accent">{totalFilms}</Text>
+                <Text view="p-20" color="accent">{filmsStore.pagination?.total || 0}</Text>
             </div>
 
-            <div className={styles.films}>
-                {
-                    !loading ? 
-                    films.map(data => (
-                        <Card
-                            key={data.id}
-                            title={data.title}
-                            description={data.description}
-                            imageUrl={data.poster.url}
-                            genre={data.category.title}
-                            releaseYear={data.releaseYear}
-                            ageRating={data.ageLimit}
-                            rating={data.rating}
-                            timing={data.duration}
-                        >
-                            <Button onClick={() => {}} outlined>В избранное</Button>
-                            <Button onClick={() => navigate(ROUTES.film.get(data.documentId))}>Смотреть</Button>
-                        </Card>
-                    ))
-                    :
-                    Array.from({ length: COUNT_OF_FILMS_ON_PAGE }).map((_, index) => (
-                        <CardSkeleton key={index} />
-                    ))
-                }
-            </div>
+            <FilmsWindow films={filmsStore.films} loading={filmsStore.isFilmsLoading} />
 
-            <div className={styles.trigger} ref={triggerRef} />
+            {trigger}
         </>
     );
-};
+});

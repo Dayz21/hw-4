@@ -10,10 +10,11 @@ export type TextProps = React.HTMLAttributes<HTMLDivElement> & {
     weight?: 'normal' | 'medium' | 'bold';
     children: React.ReactNode;
     color?: 'primary' | 'secondary' | 'accent';
+    align?: 'left' | 'center' | 'right';
     maxLines?: number;
 };
 
-export const Text: React.FC<TextProps> = ({ className, children, weight, color, view = 'p-16', tag: Tag = 'div', maxLines = 0 }) => {
+export const Text: React.FC<TextProps> = ({ className, children, weight, color, view = 'p-16', tag: Tag = 'div', maxLines = 0, align }) => {
     return (
         <Tag 
             className={classNames(
@@ -22,6 +23,7 @@ export const Text: React.FC<TextProps> = ({ className, children, weight, color, 
                 {
                     [styles[weight || "normal"]]: !!weight,
                     [styles[color || "primary"]]: !!color,
+                    [styles[align || "left"]]: !!align,
                 },
                 className
             )}
