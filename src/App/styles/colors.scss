@@ -1,0 +1,66 @@
+$bg-color: #141414;
+
+$accent-color: #E50914;
+$active-accent-color: #B20710;
+
+$primary-text-color: #FFFFFF;
+$secondary-text-color: #B3B3B3;
+$accent-text-color: $accent-color;
+
+
+// Button
+$button-bg-color: $accent-color;
+$button-text-color: #FFFFFF;
+$button-active-bg-color: $active-accent-color;
+$button-active-text-color: #FFFFFF;
+
+$button-outline-bg-color: $bg-color;
+
+$button-disabled-bg-color: #D9D9D9;
+
+
+// Input
+$input-bg-color: #181818;
+$input-placeholder-color: #8C8C8C;
+$input-border-color: #333333;
+
+$input-disabled-bg-color: #111111;
+$input-disabled-text-color: #666666;
+$input-disabled-border-color: #222222;
+
+
+// Chechbox
+$checkbox-bg-color: #141414;
+$checkbox-hover-bg-color: #1F1F1F;
+$checkbox-disabled-bg-color: #14141480;
+
+$checkbox-border-color: #B3B3B3;
+$checkbox-disabled-border-color: #444444;
+
+$disabled-color: #444444;
+
+
+// Card
+$card-bg-color: #1E1E1E;
+$card-border-color: #FFFFFF0F;
+
+$card-hover-bg-color: #232323;
+$card-hint-color: rgba(0, 0, 0, 0.8);
+
+
+// Image
+$image-bg-color: #2A2A2A;
+
+
+// Menu
+$menu-border-color: #222222;
+
+
+// skeleton-bg-color
+$skeleton-bg-color: #2A2A2A;
+$skeleton-gradient: linear-gradient(90deg, #FFFFFF00 0%, #FFFFFF1F 45%, #FFFFFF1F 55%, #FFFFFF00 100%);
+
+
+// Slider
+$nav-button-bg-color: black;
+$nav-button-shadow: 0px 4px 20px #AFADB533;
