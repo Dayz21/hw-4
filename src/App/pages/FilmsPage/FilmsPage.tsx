@@ -12,6 +12,7 @@ import { useInfinityScroll } from "@/hooks/useInfinityScroll";
 import { useSearchParams } from "react-router";
 import { reaction, type IReactionDisposer } from "mobx";
 import type { Option } from "@/components/MultiDropdown/MultiDropdown";
+import type { FilmsSortField, FilmsSortOrder } from "@/store/FilmsStore";
 
 import styles from "./FilmsPage.module.scss";
 
@@ -59,6 +60,13 @@ export const FilmsPage = observer(() => {
                     const durationFromQuery = parseNumberParam(params.get("durationFrom"));
                     const durationToQuery = parseNumberParam(params.get("durationTo"));
 
+                    const sortQuery = params.get("sort") || "";
+                    const [rawField, rawOrder] = sortQuery.split(":");
+                    const sortField: FilmsSortField | null =
+                        rawField === "rating" || rawField === "releaseYear" ? rawField : null;
+                    const sortOrder: FilmsSortOrder | null =
+                        rawOrder === "asc" || rawOrder === "desc" ? rawOrder : null;
+
                     const ageLimitsQuery = params.get("ageLimits") || "";
                     const ageLimitKeys = ageLimitsQuery ? ageLimitsQuery.split(",").filter(Boolean) : [];
 
@@ -84,6 +92,8 @@ export const FilmsPage = observer(() => {
                         durationFrom: durationFromQuery,
                         durationTo: durationToQuery,
                     });
+
+                    filmsStore.setSort(sortField, sortOrder);
 
                     await filmsStore.fetchFilms();
                 },
@@ -147,6 +157,42 @@ export const FilmsPage = observer(() => {
             },
             { replace: true }
         );
+    };
+
+    const toggleSort = (field: FilmsSortField) => {
+        setSearchParams(
+            (prev) => {
+                const next = new URLSearchParams(prev);
+
+                const isSameField = filmsStore.sortField === field;
+                const currentOrder = isSameField ? filmsStore.sortOrder : null;
+
+                let nextField: FilmsSortField | null = field;
+                let nextOrder: FilmsSortOrder | null = "desc";
+
+                if (!isSameField) {
+                    nextOrder = "desc";
+                } else if (currentOrder === "desc") {
+                    nextOrder = "asc";
+                } else if (currentOrder === "asc") {
+                    nextField = null;
+                    nextOrder = null;
+                }
+
+                if (!nextField || !nextOrder) next.delete("sort");
+                else next.set("sort", `${nextField}:${nextOrder}`);
+
+                return next;
+            },
+            { replace: true }
+        );
+    };
+
+    const getSortLabel = (field: FilmsSortField, title: string) => {
+        if (filmsStore.sortField !== field) return title;
+        if (filmsStore.sortOrder === "asc") return `${title} ↑`;
+        if (filmsStore.sortOrder === "desc") return `${title} ↓`;
+        return title;
     };
 
     useEffect(() => {
@@ -232,6 +278,20 @@ export const FilmsPage = observer(() => {
                     onChange={handleSetAgeLimits}
                     placeholder="Возраст"
                 />
+
+                <Button
+                    outlined={filmsStore.sortField !== "rating"}
+                    onClick={() => toggleSort("rating")}
+                >
+                    {getSortLabel("rating", "Рейтинг")}
+                </Button>
+
+                <Button
+                    outlined={filmsStore.sortField !== "releaseYear"}
+                    onClick={() => toggleSort("releaseYear")}
+                >
+                    {getSortLabel("releaseYear", "Год")}
+                </Button>
             </div>
 
             <div className={styles.range_filters}>

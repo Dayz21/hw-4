@@ -83,7 +83,7 @@ export const MultiDropdown: React.FC<MultiDropdownProps> = ({className, options,
     />
         <div className={classNames(styles.dropdown_list, {[styles.open]: !disabled && isOpen})}>
           {
-            filteredOptions.sort((a, b) => a.value.localeCompare(b.value)).map(data => (
+            filteredOptions.map(data => (
               <DropdownElement 
                 key={data.key} 
                 data={data} 

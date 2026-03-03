@@ -62,6 +62,10 @@ class FilmsAPIClass {
             if (Object.keys(filterConditions).length > 0) {
                 queryParams.filters = filterConditions;
             }
+
+            if (filters.sort && filters.sort.length > 0) {
+                queryParams.sort = filters.sort;
+            }
         }
 
         const query = qs.stringify(queryParams, { skipNulls: true });

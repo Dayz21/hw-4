@@ -77,6 +77,8 @@ export type FilmFiltersType = {
     durationTo?: number | null,
 
     ageLimits?: Option[],
+
+    sort?: string[],
 }
 
 export type FetchFilmsResponse = {
@@ -99,4 +101,5 @@ export type FilmsQueryParams = {
     pagination: { page: number; pageSize: number };
     populate: string[];
     filters?: FilmFiltersConditions;
+    sort?: string[];
 };

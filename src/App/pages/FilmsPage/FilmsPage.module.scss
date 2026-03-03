@@ -13,15 +13,23 @@
 .search {
     display: grid;
     grid-template-columns: auto max-content;
-    gap: variables.$m-spacing;
+    @include mixins.adaptive(gap,
+        variables.$xs-spacing,
+        variables.$s-spacing,
+        variables.$m-spacing,
+        variables.$m-spacing);
     margin-bottom: variables.$s-spacing;
 }
 
 .filters {
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: variables.$xs-spacing;
     margin-bottom: variables.$m-spacing;
+
+    @media screen and (max-width: 768px) {
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    }
 }
 
 .range_filters {

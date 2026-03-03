@@ -8,6 +8,9 @@ import type { Option } from "@/components/MultiDropdown/MultiDropdown";
 import { CategoriesAPI } from "@/api/CategoriesAPI";
 import { COUNT_OF_FILMS_ON_PAGE } from "@/config/config";
 
+export type FilmsSortField = "rating" | "releaseYear";
+export type FilmsSortOrder = "asc" | "desc";
+
 type private_fields =
     | "_films"
     | "_pagination"
@@ -21,7 +24,9 @@ type private_fields =
     | "_ratingFrom"
     | "_ratingTo"
     | "_durationFrom"
-    | "_durationTo";
+    | "_durationTo"
+    | "_sortField"
+    | "_sortOrder";
 
 export class FilmsStore implements ILocalStore {
     private _films: FilmType[] = [];
@@ -38,6 +43,9 @@ export class FilmsStore implements ILocalStore {
     private _ratingTo: number | null = null;
     private _durationFrom: number | null = null;
     private _durationTo: number | null = null;
+
+    private _sortField: FilmsSortField | null = null;
+    private _sortOrder: FilmsSortOrder | null = null;
 
     constructor() {
         makeObservable<this, private_fields>(this, {
@@ -56,6 +64,9 @@ export class FilmsStore implements ILocalStore {
             _durationFrom: observable,
             _durationTo: observable,
 
+            _sortField: observable,
+            _sortOrder: observable,
+
             films: computed,
             pagination: computed,
             categories: computed,
@@ -70,6 +81,10 @@ export class FilmsStore implements ILocalStore {
             durationFrom: computed,
             durationTo: computed,
 
+            sortField: computed,
+            sortOrder: computed,
+            sort: computed,
+
             fetchFilms: action.bound,
             fetchNextFilms: action.bound,
             fetchCategories: action.bound,
@@ -83,6 +98,8 @@ export class FilmsStore implements ILocalStore {
             setRatingTo: action.bound,
             setDurationFrom: action.bound,
             setDurationTo: action.bound,
+
+            setSort: action.bound,
         });
     }
 
@@ -120,6 +137,19 @@ export class FilmsStore implements ILocalStore {
 
     get durationTo() {
         return this._durationTo;
+    }
+
+    get sortField() {
+        return this._sortField;
+    }
+
+    get sortOrder() {
+        return this._sortOrder;
+    }
+
+    get sort(): string[] | undefined {
+        if (!this._sortField || !this._sortOrder) return undefined;
+        return [`${this._sortField}:${this._sortOrder}`];
     }
 
     get categories(): Option[] {
@@ -193,6 +223,11 @@ export class FilmsStore implements ILocalStore {
         this._durationTo = value;
     }
 
+    setSort(sortField: FilmsSortField | null, sortOrder: FilmsSortOrder | null) {
+        this._sortField = sortField;
+        this._sortOrder = sortField && sortOrder ? sortOrder : null;
+    }
+
     async fetchFilms(page = 1, pageSize = COUNT_OF_FILMS_ON_PAGE) {
         const selectedCategories = this._selectedCategories;
         const search = this._search;
@@ -215,6 +250,8 @@ export class FilmsStore implements ILocalStore {
                     ratingTo: this._ratingTo,
                     durationFrom: this._durationFrom,
                     durationTo: this._durationTo,
+
+                    sort: this.sort,
                 }
             );
             runInAction(() => {
@@ -248,6 +285,8 @@ export class FilmsStore implements ILocalStore {
                     ratingTo: this._ratingTo,
                     durationFrom: this._durationFrom,
                     durationTo: this._durationTo,
+
+                    sort: this.sort,
                 }
             );
             runInAction(() => {
@@ -285,5 +324,8 @@ export class FilmsStore implements ILocalStore {
         this._ratingTo = null;
         this._durationFrom = null;
         this._durationTo = null;
+
+        this._sortField = null;
+        this._sortOrder = null;
     }
 }

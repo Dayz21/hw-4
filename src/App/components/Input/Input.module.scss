@@ -7,12 +7,7 @@
     gap: variables.$xxs-spacing;
     align-items: center;
     padding: 14px 11px;
-    min-width: 300px;
-    @include mixins.adaptive(min-width,
-        200px,
-        200px,
-        300px,
-        300px);
+    min-width: 200px;
     cursor: text;
 
     background-color: colors.$input-bg-color;
