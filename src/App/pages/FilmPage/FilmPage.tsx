@@ -115,6 +115,7 @@ export const FilmPage: React.FC = observer(() => {
                     
                 <FilmsCarousel
                     films={recommendations}
+                    loading={filmStore.isRecommendationsLoading}
                     onFilmClick={(film) => {
                         if (film.documentId === filmId) return;
                         filmStore.resetFilm();

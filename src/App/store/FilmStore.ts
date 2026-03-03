@@ -71,11 +71,10 @@ export class FilmStore implements ILocalStore {
         this._isRecommendationsLoading = true;
 
         try {
-            const { films } = await FilmsAPI.fetchFilms({
-                page: 1,
-                pageSize: COUNT_OF_RECOMMENDATIONS,
-                isFeatured: true,
-            });
+            const { films } = await FilmsAPI.fetchFilms(
+                1, COUNT_OF_RECOMMENDATIONS,
+                { isFeatured: true }
+            );
 
             runInAction(() => {
                 this._recommendations = films;

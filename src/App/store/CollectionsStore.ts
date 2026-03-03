@@ -12,20 +12,18 @@ type CategoryFilmsState = {
     films: FilmType[];
 };
 
-type PrivateFields = "_categories" | "_isLoading" | "_categoryFilms" | "_destroyed";
+type PrivateFields = "_categories" | "_isLoading" | "_categoryFilms";
 
 export class CollectionsStore implements ILocalStore {
     private _categories: CategoryType[] = [];
     private _isLoading = false;
     private _categoryFilms: Record<string, CategoryFilmsState> = {};
-    private _destroyed = false;
 
     constructor() {
         makeObservable<this, PrivateFields>(this, {
             _categories: observable.ref,
             _isLoading: observable,
             _categoryFilms: observable.ref,
-            _destroyed: observable,
             categories: computed,
             isLoading: computed,
             categoryFilms: computed,
@@ -70,19 +68,15 @@ export class CollectionsStore implements ILocalStore {
 
         try {
             const categories = await CategoriesAPI.fetchCategories();
-            if (!this._destroyed) {
-                runInAction(() => {
-                    this._categories = categories;
-                });
-            }
+            runInAction(() => {
+                this._categories = categories;
+            });
         } catch (error) {
             console.error("Failed to fetch collections", error);
         } finally {
-            if (!this._destroyed) {
-                runInAction(() => {
-                    this._isLoading = false;
-                });
-            }
+            runInAction(() => {
+                this._isLoading = false;
+            });
         }
     }
 
@@ -106,13 +100,11 @@ export class CollectionsStore implements ILocalStore {
             categories.map(async (category) => {
                 try {
                     const option = this.getCategoryOption(category);
-                    const { films } = await FilmsAPI.fetchFilms({
-                        page: 1,
-                        pageSize: COUNT_OF_FILMS_ON_CATEGORIES_PAGE,
-                        categories: [option],
-                    });
-
-                    if (this._destroyed) return;
+                    const { films } = await FilmsAPI.fetchFilms(
+                        1,
+                        COUNT_OF_FILMS_ON_CATEGORIES_PAGE,
+                        { categories: [option] },
+                    );
 
                     runInAction(() => {
                         this._categoryFilms = {
@@ -125,8 +117,6 @@ export class CollectionsStore implements ILocalStore {
                     });
                 } catch (error) {
                     console.error("Failed to fetch films for category", category.title, error);
-                    if (this._destroyed) return;
-
                     runInAction(() => {
                         this._categoryFilms = {
                             ...this._categoryFilms,
@@ -142,7 +132,6 @@ export class CollectionsStore implements ILocalStore {
     }
 
     destroy() {
-        this._destroyed = true;
         this._categories = [];
         this._categoryFilms = {};
         this._isLoading = false;

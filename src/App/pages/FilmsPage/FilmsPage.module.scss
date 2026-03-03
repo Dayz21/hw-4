@@ -19,8 +19,31 @@
 
 .filters {
     display: flex;
+    flex-wrap: wrap;
+    gap: variables.$xs-spacing;
+    margin-bottom: variables.$m-spacing;
+}
+
+.range_filters {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     gap: variables.$xs-spacing;
     margin-bottom: variables.$l-spacing;
+}
+
+.range_group {
+    display: grid;
+    gap: variables.$xxs-spacing;
+}
+
+.range_pair {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: variables.$xs-spacing;
+}
+
+.range_pair * {
+    min-width: 100px;
 }
 
 .films_title {

@@ -41,11 +41,11 @@ export class RecommendationsStore implements ILocalStore {
         this._isLoading = true;
 
         try {
-            const { films, pagination } = await FilmsAPI.fetchFilms({
+            const { films, pagination } = await FilmsAPI.fetchFilms(
                 page,
                 pageSize,
-                isFeatured: true,
-            });
+                { isFeatured: true },
+            );
 
             runInAction(() => {
                 this._films = films;
@@ -66,11 +66,11 @@ export class RecommendationsStore implements ILocalStore {
         const nextPage = this._pagination.page + 1;
 
         try {
-            const { films, pagination } = await FilmsAPI.fetchFilms({
-                page: nextPage,
-                pageSize: this._pagination.pageSize,
-                isFeatured: true,
-            });
+            const { films, pagination } = await FilmsAPI.fetchFilms(
+                nextPage,
+                this._pagination.pageSize,
+                { isFeatured: true },
+            );
 
             runInAction(() => {
                 this._films = [...this._films, ...films];
