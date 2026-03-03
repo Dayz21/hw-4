@@ -1,5 +1,7 @@
+import type { Option } from "@/components/MultiDropdown/MultiDropdown";
 import { toCategoryType, type CategoryReponseType, type CategoryType } from "./Category";
 import { toImageType, type ImageResponseType, type ImageType } from "./Image";
+import type { PaginationType } from "@/store/models/Pagination";
 
 export type FilmResponseType = {
     id: number,
@@ -34,7 +36,7 @@ export type FilmType = {
     trailerUrl: string,
     category: CategoryType,
     poster: ImageType,
-    gallery?: ImageType[],
+    gallery: ImageType[],
 };
 
 export const toFilmType = (response: FilmResponseType): FilmType => ({
@@ -52,5 +54,52 @@ export const toFilmType = (response: FilmResponseType): FilmType => ({
     trailerUrl: response.trailerUrl,
     category: toCategoryType(response.category),
     poster: toImageType(response.poster),
-    gallery: response.gallery?.map(toImageType),
+    gallery: response.gallery?.map(toImageType) || [],
 });
+
+
+export type FetchFilmsFunc = (
+    page: number,
+    pageSize: number,
+    filters?: FilmFiltersType,
+) => Promise<FetchFilmsResponse>;
+
+export type FilmFiltersType = {
+    categories?: Option[],
+    search?: string,
+    isFeatured?: boolean,
+
+    releaseYearFrom?: number | null,
+    releaseYearTo?: number | null,
+    ratingFrom?: number | null,
+    ratingTo?: number | null,
+    durationFrom?: number | null,
+    durationTo?: number | null,
+
+    ageLimits?: Option[],
+
+    sort?: string[],
+}
+
+export type FetchFilmsResponse = {
+    films: FilmType[],
+    pagination: PaginationType,
+}
+
+export type FilmFiltersConditions = {
+    title?: { $containsi: string };
+    category?: { documentId: { $in: string[] } };
+    isFeatured?: { $eq: boolean };
+
+    releaseYear?: { $gte?: number; $lte?: number };
+    rating?: { $gte?: number; $lte?: number };
+    duration?: { $gte?: number; $lte?: number };
+    ageLimit?: { $in: number[] };
+};
+
+export type FilmsQueryParams = {
+    pagination: { page: number; pageSize: number };
+    populate: string[];
+    filters?: FilmFiltersConditions;
+    sort?: string[];
+};

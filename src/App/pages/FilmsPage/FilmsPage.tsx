@@ -2,101 +2,249 @@ import { Text } from "@/components/Text";
 import { Input } from "@/components/Input";
 import { Button } from "@/components/Button";
 import { MultiDropdown } from "@/components/MultiDropdown";
-import { useEffect, useState, useRef } from "react";
-import { FilmsAPI } from "@/api/FilmsAPI";
-import { Card } from "@/components/Card";
-import { CategoriesAPI } from "@/api/CategoriesAPI";
-import { toOptionType } from "@/api/types/Category";
-import { COUNT_OF_FILMS_ON_PAGE } from "@/config/config";
+import { NumberInput } from "@/components/NumberInput";
+import { useEffect } from "react";
+import { FilmsWindow } from "./FilmsWIndow";
+import { useLocalStore } from "@/hooks/useLocalStore";
+import { FilmsStore } from "@/store/FilmsStore";
+import { observer } from "mobx-react-lite";
+import { useInfinityScroll } from "@/hooks/useInfinityScroll";
+import { useSearchParams } from "react-router";
+import { reaction, type IReactionDisposer } from "mobx";
 import type { Option } from "@/components/MultiDropdown/MultiDropdown";
-import type { FilmType } from "@/api/types/Film";
+import type { FilmsSortField, FilmsSortOrder } from "@/store/FilmsStore";
 
 import styles from "./FilmsPage.module.scss";
-import { CardSkeleton } from "@/components/Card/CardSkeleton";
-import { useNavigate } from "react-router";
-import { ROUTES } from "@/config/routes";
 
-export const FilmsPage: React.FC = () => {
-    const [search, setSearch] = useState("");
-    const curSearch = useRef("");
+import { parseNumberParam } from "@/utils/numberInput";
 
-    const [options, setOptions] = useState<Option[]>([]);
-    const [filters, setFilters] = useState<Option[]>([]);
+import {
+    AGE_LIMIT_OPTIONS,
+    DURATION_MAX,
+    DURATION_MIN,
+    RATING_MAX,
+    RATING_MIN,
+    YEAR_MAX,
+    YEAR_MIN,
+} from "@/config/config";
+
+
+export const FilmsPage = observer(() => {
+    const filmsStore = useLocalStore(() => new FilmsStore());
+    const [searchParams, setSearchParams] = useSearchParams();
+    const searchParamsKey = searchParams.toString();
+
     useEffect(() => {
-        CategoriesAPI
-            .fetchCategories()
-            .then(categories => setOptions(categories.map(toOptionType)))
-            .catch(console.error);
-    }, []);
+        let cancelled = false;
+        let dispose: IReactionDisposer | undefined;
 
+        (async () => {
+            await filmsStore.fetchCategories();
+            if (cancelled) return;
 
-    const page = useRef(1);
-    const [totalFilms, setTotalFilms] = useState(0);
-    const [films, setFilms] = useState<FilmType[]>([]);
-    const [loading, setLoading] = useState(true);
-    
-    useEffect(() => {
-        FilmsAPI
-            .fetchFilms(page.current, COUNT_OF_FILMS_ON_PAGE)
-            .then(({ films, total }) => {
-                setFilms(films);
-                setTotalFilms(total);
-            })
-            .catch(console.error)
-            .finally(() => setLoading(false));
-    }, []);
-    
-    const fetchFilms = (filters?: Option[], search?: string, reset: boolean = false) => {
-        FilmsAPI
-            .fetchFilms(page.current, COUNT_OF_FILMS_ON_PAGE, filters, search)
-            .then(({ films, total }) => {
-                setFilms(prev => reset ? films : [...prev, ...films]);
-                setTotalFilms(total);
-            })
-            .catch(console.error);
-    }
+            dispose = reaction(
+                () => filmsStore.categories,
+                async (availableCategories) => {
+                    if (cancelled) return;
 
-    const onSearch = () => {
-        page.current = 1;
-        curSearch.current = search;
+                    const params = new URLSearchParams(searchParamsKey);
 
-        setLoading(true);
-        fetchFilms(filters, search, true);
-        setLoading(false);
-    }
+                    const searchQuery = params.get("search") || "";
+                    const categoriesQuery = params.get("categories") || "";
+                    const categoryKeys = categoriesQuery ? categoriesQuery.split(",").filter(Boolean) : [];
 
-    const onSetFilters = (filters: Option[]) => {
-        page.current = 1;
-        setFilters(filters);
+                    const yearFromQuery = parseNumberParam(params.get("yearFrom"));
+                    const yearToQuery = parseNumberParam(params.get("yearTo"));
+                    const ratingFromQuery = parseNumberParam(params.get("ratingFrom"));
+                    const ratingToQuery = parseNumberParam(params.get("ratingTo"));
+                    const durationFromQuery = parseNumberParam(params.get("durationFrom"));
+                    const durationToQuery = parseNumberParam(params.get("durationTo"));
 
-        setLoading(true);
-        fetchFilms(filters, curSearch.current, true);
-        setLoading(false);
-    }
-    
-    const triggerRef = useRef<HTMLDivElement>(null);
-    useEffect(() => {
-        const observer = new IntersectionObserver(entries => {
-            if (entries[0].isIntersecting && films.length >= page.current * COUNT_OF_FILMS_ON_PAGE) {
-                page.current += 1;
-                fetchFilms(filters, curSearch.current);
-            }
-        }, {
-            root: null,
-            rootMargin: "0px",
-            threshold: 0.1
-        });
-        
-        if (triggerRef.current) {
-            observer.observe(triggerRef.current);
-        }
+                    const sortQuery = params.get("sort") || "";
+                    const [rawField, rawOrder] = sortQuery.split(":");
+                    const sortField: FilmsSortField | null =
+                        rawField === "rating" || rawField === "releaseYear" ? rawField : null;
+                    const sortOrder: FilmsSortOrder | null =
+                        rawOrder === "asc" || rawOrder === "desc" ? rawOrder : null;
+
+                    const ageLimitsQuery = params.get("ageLimits") || "";
+                    const ageLimitKeys = ageLimitsQuery ? ageLimitsQuery.split(",").filter(Boolean) : [];
+
+                    const categoryByKey = new Map(availableCategories.map((c) => [c.key, c] as const));
+                    const validatedCategories = categoryKeys
+                    .map((key) => categoryByKey.get(key))
+                    .filter((v): v is Option => v !== undefined);
+
+                    const ageLimitByKey = new Map(AGE_LIMIT_OPTIONS.map((o) => [o.key, o] as const));
+                    const validatedAgeLimits = ageLimitKeys
+                        .map((key) => ageLimitByKey.get(key))
+                        .filter((v): v is Option => v !== undefined);
+
+                    filmsStore.setSearchText(searchQuery);
+                    filmsStore.setFilters(validatedCategories);
+
+                    filmsStore.setAgeLimits(validatedAgeLimits);
+                    filmsStore.setAdvancedFilters({
+                        releaseYearFrom: yearFromQuery,
+                        releaseYearTo: yearToQuery,
+                        ratingFrom: ratingFromQuery,
+                        ratingTo: ratingToQuery,
+                        durationFrom: durationFromQuery,
+                        durationTo: durationToQuery,
+                    });
+
+                    filmsStore.setSort(sortField, sortOrder);
+
+                    await filmsStore.fetchFilms();
+                },
+                { fireImmediately: true }
+            );
+        })();
 
         return () => {
-            observer.disconnect();
+            cancelled = true;
+            dispose?.();
         };
-    });
+    }, [filmsStore, searchParamsKey]);
 
-    const navigate = useNavigate();
+    useEffect(() => {
+        if ('scrollRestoration' in window.history) {
+            window.history.scrollRestoration = 'manual';
+        }
+        window.scrollTo(0, 0);
+    }, []);
+
+    const handleSearch = () => {
+        setSearchParams(
+            (prev) => {
+                const next = new URLSearchParams(prev);
+                const normalized = filmsStore.search.trim();
+
+                if (normalized) next.set("search", normalized);
+                else next.delete("search");
+
+                return next;
+            },
+            { replace: true }
+        );
+    };
+
+    const handleSetFilters = (filters: Option[]) => {
+        setSearchParams(
+            (prev) => {
+                const next = new URLSearchParams(prev);
+                const categories = filters.map((f) => f.key).filter(Boolean);
+
+                if (categories.length > 0) next.set("categories", categories.join(","));
+                else next.delete("categories");
+
+                return next;
+            },
+            { replace: true }
+        );
+    };
+
+    const handleSetAgeLimits = (limits: Option[]) => {
+        setSearchParams(
+            (prev) => {
+                const next = new URLSearchParams(prev);
+                const keys = limits.map((l) => l.key).filter(Boolean);
+
+                if (keys.length > 0) next.set("ageLimits", keys.join(","));
+                else next.delete("ageLimits");
+
+                return next;
+            },
+            { replace: true }
+        );
+    };
+
+    const toggleSort = (field: FilmsSortField) => {
+        setSearchParams(
+            (prev) => {
+                const next = new URLSearchParams(prev);
+
+                const isSameField = filmsStore.sortField === field;
+                const currentOrder = isSameField ? filmsStore.sortOrder : null;
+
+                let nextField: FilmsSortField | null = field;
+                let nextOrder: FilmsSortOrder | null = "desc";
+
+                if (!isSameField) {
+                    nextOrder = "desc";
+                } else if (currentOrder === "desc") {
+                    nextOrder = "asc";
+                } else if (currentOrder === "asc") {
+                    nextField = null;
+                    nextOrder = null;
+                }
+
+                if (!nextField || !nextOrder) next.delete("sort");
+                else next.set("sort", `${nextField}:${nextOrder}`);
+
+                return next;
+            },
+            { replace: true }
+        );
+    };
+
+    const getSortLabel = (field: FilmsSortField, title: string) => {
+        if (filmsStore.sortField !== field) return title;
+        if (filmsStore.sortOrder === "asc") return `${title} ↑`;
+        if (filmsStore.sortOrder === "desc") return `${title} ↓`;
+        return title;
+    };
+
+    useEffect(() => {
+        const timeoutId = window.setTimeout(() => {
+            const yf = filmsStore.releaseYearFrom;
+            const yt = filmsStore.releaseYearTo;
+            const rf = filmsStore.ratingFrom;
+            const rt = filmsStore.ratingTo;
+            const df = filmsStore.durationFrom;
+            const dt = filmsStore.durationTo;
+
+            setSearchParams(
+                (prev) => {
+                    const prevString = prev.toString();
+                    const next = new URLSearchParams(prev);
+
+                    const setOrDelete = (key: string, value: number | null) => {
+                        if (value == null) next.delete(key);
+                        else next.set(key, String(value));
+                    };
+
+                    setOrDelete("yearFrom", yf);
+                    setOrDelete("yearTo", yt);
+                    setOrDelete("ratingFrom", rf);
+                    setOrDelete("ratingTo", rt);
+                    setOrDelete("durationFrom", df);
+                    setOrDelete("durationTo", dt);
+
+                    const nextString = next.toString();
+                    return nextString === prevString ? prev : next;
+                },
+                { replace: true }
+            );
+        }, 400);
+
+        return () => {
+            window.clearTimeout(timeoutId);
+        };
+    }, [
+        filmsStore.releaseYearFrom,
+        filmsStore.releaseYearTo,
+        filmsStore.ratingFrom,
+        filmsStore.ratingTo,
+        filmsStore.durationFrom,
+        filmsStore.durationTo,
+        setSearchParams,
+    ]);
+
+    const trigger = useInfinityScroll(() => filmsStore.fetchNextFilms());
+    const categories = filmsStore.categories;
+    const selected = filmsStore.selectedCategories;
+    const selectedAgeLimits = filmsStore.selectedAgeLimits;
 
     return (
         <>
@@ -105,57 +253,125 @@ export const FilmsPage: React.FC = () => {
             </Text>
             
             <Text view="p-20" tag="h2" color="secondary" className={styles.subtitle}>
-                Подборка для вечера уже здесь: фильмы, сериалы и новинки. <br/> 
+                Подборка для вечера уже здесь: фильмы, сериалы и рекомендации. <br/> 
                 Найди что посмотреть — за пару секунд.
             </Text>
 
             <div className={styles.search}>
-                <Input value={search} onChange={setSearch} placeholder="Искать фильм" />
-                <Button onClick={onSearch} >Найти</Button>
+                <Input value={filmsStore.search} onChange={filmsStore.setSearchText} placeholder="Искать фильм" />
+                <Button onClick={handleSearch} >Найти</Button>
             </div>
 
             <div className={styles.filters}>
                 <MultiDropdown
-                    options={options}
+                    options={categories}
                     getTitle={(value) => value.map(el => el.value).join(", ")}
-                    value={filters}
-                    onChange={onSetFilters}
+                    value={selected}
+                    onChange={handleSetFilters}
                     placeholder="Жанры"
                 />
+
+                <MultiDropdown
+                    options={AGE_LIMIT_OPTIONS}
+                    getTitle={(value) => value.map((el) => el.value).join(", ")}
+                    value={selectedAgeLimits}
+                    onChange={handleSetAgeLimits}
+                    placeholder="Возраст"
+                />
+
+                <Button
+                    outlined={filmsStore.sortField !== "rating"}
+                    onClick={() => toggleSort("rating")}
+                >
+                    {getSortLabel("rating", "Рейтинг")}
+                </Button>
+
+                <Button
+                    outlined={filmsStore.sortField !== "releaseYear"}
+                    onClick={() => toggleSort("releaseYear")}
+                >
+                    {getSortLabel("releaseYear", "Год")}
+                </Button>
+            </div>
+
+            <div className={styles.range_filters}>
+                <div className={styles.range_group}>
+                    <Text view="p-14" color="secondary">Год</Text>
+                    <div className={styles.range_pair}>
+                        <NumberInput
+                            value={filmsStore.releaseYearFrom}
+                            onChange={filmsStore.setReleaseYearFrom}
+                            placeholder="от"
+                            min={YEAR_MIN}
+                            max={YEAR_MAX}
+                            kind="int"
+                        />
+                        <NumberInput
+                            value={filmsStore.releaseYearTo}
+                            onChange={filmsStore.setReleaseYearTo}
+                            placeholder="до"
+                            min={YEAR_MIN}
+                            max={YEAR_MAX}
+                            kind="int"
+                        />
+                    </div>
+                </div>
+
+                <div className={styles.range_group}>
+                    <Text view="p-14" color="secondary">Рейтинг</Text>
+                    <div className={styles.range_pair}>
+                        <NumberInput
+                            value={filmsStore.ratingFrom}
+                            onChange={filmsStore.setRatingFrom}
+                            placeholder="от"
+                            step="0.1"
+                            min={RATING_MIN}
+                            max={RATING_MAX}
+                            kind="float"
+                        />
+                        <NumberInput
+                            value={filmsStore.ratingTo}
+                            onChange={filmsStore.setRatingTo}
+                            placeholder="до"
+                            step="0.1"
+                            min={RATING_MIN}
+                            max={RATING_MAX}
+                            kind="float"
+                        />
+                    </div>
+                </div>
+
+                <div className={styles.range_group}>
+                    <Text view="p-14" color="secondary">Длительность, мин</Text>
+                    <div className={styles.range_pair}>
+                        <NumberInput
+                            value={filmsStore.durationFrom}
+                            onChange={filmsStore.setDurationFrom}
+                            placeholder="от"
+                            min={DURATION_MIN}
+                            max={DURATION_MAX}
+                            kind="int"
+                        />
+                        <NumberInput
+                            value={filmsStore.durationTo}
+                            onChange={filmsStore.setDurationTo}
+                            placeholder="до"
+                            min={DURATION_MIN}
+                            max={DURATION_MAX}
+                            kind="int"
+                        />
+                    </div>
+                </div>
             </div>
 
             <div className={styles.films_title}>
                 <Text view="subtitle" weight="bold">Все фильмы</Text>
-                <Text view="p-20" color="accent">{totalFilms}</Text>
+                <Text view="p-20" color="accent">{filmsStore.pagination?.total || 0}</Text>
             </div>
 
-            <div className={styles.films}>
-                {
-                    !loading ? 
-                    films.map(data => (
-                        <Card
-                            key={data.id}
-                            title={data.title}
-                            description={data.description}
-                            imageUrl={data.poster.url}
-                            genre={data.category.title}
-                            releaseYear={data.releaseYear}
-                            ageRating={data.ageLimit}
-                            rating={data.rating}
-                            timing={data.duration}
-                        >
-                            <Button onClick={() => {}} outlined>В избранное</Button>
-                            <Button onClick={() => navigate(ROUTES.film.get(data.documentId))}>Смотреть</Button>
-                        </Card>
-                    ))
-                    :
-                    Array.from({ length: COUNT_OF_FILMS_ON_PAGE }).map((_, index) => (
-                        <CardSkeleton key={index} />
-                    ))
-                }
-            </div>
+            <FilmsWindow films={filmsStore.films} loading={filmsStore.isFilmsLoading} />
 
-            <div className={styles.trigger} ref={triggerRef} />
+            {trigger}
         </>
     );
-};
+});

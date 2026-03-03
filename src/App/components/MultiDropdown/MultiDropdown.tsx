@@ -52,7 +52,21 @@ export const MultiDropdown: React.FC<MultiDropdownProps> = ({className, options,
     }
   }
 
+  const handleFocus = () => {
+    setIsOpen(prev => !prev);
+  }
+
+  const handleBlur = () => {
+    setIsOpen(false);
+    setFilter("");
+    inputRef.current?.blur();
+  }
+
   const title = useMemo(() => getTitle(value), [value, getTitle]);
+
+  const filteredOptions = useMemo(() => {
+    return options.filter(el => el.value.toLowerCase().includes(filter.toLowerCase().trim()));
+  }, [filter, options]);
   
   return (
     <div ref={dropdownRef} className={classNames(styles.dropdown, className, {[styles.active]: !disabled && isOpen})}>
@@ -63,15 +77,19 @@ export const MultiDropdown: React.FC<MultiDropdownProps> = ({className, options,
         value={isOpen ? filter : (value.length !== 0 ? title : "")} 
         placeholder={value.length === 0 ? placeholder || "" : title} 
         onChange={setFilter} 
-        onFocus={() => {setIsOpen(prev => !prev); }} 
-        onBlur={() => {setIsOpen(false); setFilter(""); inputRef.current?.blur()}} 
+        onFocus={handleFocus} 
+        onBlur={handleBlur} 
         afterSlot={<ArrowRightIcon angle={90} color='secondary' size={24} />} 
     />
         <div className={classNames(styles.dropdown_list, {[styles.open]: !disabled && isOpen})}>
           {
-            options.filter(el => el.value.toLowerCase().includes(filter.toLowerCase().trim())).sort().map(data => {
-              return <DropdownElement key={data.key} data={data} onClick={handleClick} active={!!value.find(el => el.key === data.key)} />
-            })
+            filteredOptions.map(data => (
+              <DropdownElement 
+                key={data.key} 
+                data={data} 
+                onClick={handleClick} 
+                active={!!value.find(el => el.key === data.key)} />
+            ))
           }
         </div>
     </div>

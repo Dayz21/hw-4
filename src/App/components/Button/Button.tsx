@@ -19,7 +19,7 @@ export const Button: React.FC<ButtonProps> = ({ loading, children, onClick, outl
             {...props}
             className={classNames(styles.button, { [styles.outlined]: outlined, [styles.loading]: loading }, className)}
             disabled={props.disabled}
-            onClick={() => onClick()}
+            onClick={onClick}
         >
             {
                 loading &&

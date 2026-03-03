@@ -50,6 +50,11 @@
     );
 }
 
+.actions {
+    display: flex;
+    gap: variables.$xxs-spacing;
+}
+
 
 .title_skeleton {
     width: 100%;

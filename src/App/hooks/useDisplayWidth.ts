@@ -1,3 +1,4 @@
+import { DESKTOP_WIDTH, LAPTOP_WIDTH, TABLET_WIDTH } from "@/config/config";
 import { useEffect, useState } from "react";
 
 export const useDisplayWidth = () => {
@@ -15,5 +16,19 @@ export const useDisplayWidth = () => {
         };
     }, []);
 
+
     return displayWidth;
+}
+
+export const useCardsCount = () => {
+    const displayWidth = useDisplayWidth();
+    if (displayWidth >= DESKTOP_WIDTH) {
+        return 3;
+    } else if (displayWidth >= LAPTOP_WIDTH) {
+        return 2;
+    } else if (displayWidth >= TABLET_WIDTH) {
+        return 2;
+    } else {
+        return 1;
+    }
 }

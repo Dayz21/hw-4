@@ -1,9 +1,8 @@
 import { API } from "./API";
-import { toCategoryType } from "./types/Category";
-import { type FilmType } from "./types/Film";
+import { toCategoryType, type CategoryType } from "@/store/models/Category";
 
 class CategoriesAPIClass {
-    async fetchCategories(): Promise<FilmType[]> {
+    async fetchCategories(): Promise<CategoryType[]> {
         const response = await API.get(`/film-categories`);
         return response.data.data.map(toCategoryType);
     }

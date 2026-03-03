@@ -13,14 +13,45 @@
 .search {
     display: grid;
     grid-template-columns: auto max-content;
-    gap: variables.$m-spacing;
+    @include mixins.adaptive(gap,
+        variables.$xs-spacing,
+        variables.$s-spacing,
+        variables.$m-spacing,
+        variables.$m-spacing);
     margin-bottom: variables.$s-spacing;
 }
 
 .filters {
-    display: flex;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: variables.$xs-spacing;
+    margin-bottom: variables.$m-spacing;
+
+    @media screen and (max-width: 768px) {
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    }
+}
+
+.range_filters {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     gap: variables.$xs-spacing;
     margin-bottom: variables.$l-spacing;
+}
+
+.range_group {
+    display: grid;
+    gap: variables.$xxs-spacing;
+}
+
+.range_pair {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: variables.$xs-spacing;
+}
+
+.range_pair * {
+    min-width: 100px;
 }
 
 .films_title {
@@ -30,23 +61,18 @@
     margin-bottom: variables.$m-spacing;
 }
 
-.films {
+.films_row,
+.films_skeleton {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(325px, 1fr));
-    @include mixins.adaptive(gap,
-        variables.$s-spacing variables.$xxs-spacing,
-        variables.$s-spacing variables.$xs-spacing,
-        variables.$s-spacing variables.$l-spacing,
-        variables.$s-spacing variables.$xl-spacing);
 
-    margin-bottom: variables.$xl-spacing;
+    @include mixins.adaptive(gap,
+        variables.$xs-spacing variables.$xxs-spacing,
+        variables.$xs-spacing variables.$xs-spacing,
+        variables.$xs-spacing variables.$l-spacing,
+        variables.$xs-spacing variables.$xl-spacing );
 }
 
-.trigger {
-    width: 100%;
-    height: 800px;
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    pointer-events: none;
+.films {
+    margin-bottom: variables.$xl-spacing;
 }

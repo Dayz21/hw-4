@@ -5,6 +5,11 @@ import App from "..";
 import { TestComponents } from "@/pages/TestComponents";
 import { FilmsPage } from "@/pages/FilmsPage";
 import { FilmPage } from "@/pages/FilmPage";
+import { LoginPage, RegisterPage } from "@/pages/Auth";
+import { AccountPage } from "@/pages/AccountPage";
+import { FavoritesPage } from "@/pages/FavoritesPage";
+import { RecommendationsPage } from "@/pages/RecommendationsPage";
+import { CollectionsPage } from "@/pages/CollectionsPage";
 
 export const routerConfig: RouteObject[] = [
     {
@@ -30,25 +35,33 @@ export const routerConfig: RouteObject[] = [
             },
             {
                 path: ROUTES.account.path,
-                element: <div>Account</div>,
+                element: <AccountPage />,
             },
             {
                 path: ROUTES.favorites.path,
-                element: <div>Favorites</div>,
+                element: <FavoritesPage />,
             },
             {
-                path: ROUTES.newItems.path,
-                element: <div>New Items</div>,
+                path: ROUTES.recommendations.path,
+                element: <RecommendationsPage />,
             },
             {
                 path: ROUTES.collections.path,
-                element: <div>Collections</div>,
+                element: <CollectionsPage />,
             },
             {
                 path: ROUTES.components.path,
                 element: <TestComponents />,
             },
         ]
+    },
+    {
+        path: ROUTES.login.path,
+        element: <LoginPage />,
+    },
+    {
+        path: ROUTES.register.path,
+        element: <RegisterPage />,
     },
     {
         path: "*",

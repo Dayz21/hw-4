@@ -15,12 +15,4 @@ $s-spacing: 24px;
 $xs-spacing: 16px;
 $xxs-spacing: 8px;
 
-@media screen and (width <=1024px) {
-    $xxl-spacing: 20px;
-    $xl-spacing: 64px;
-    $l-spacing: 48px;
-    $m-spacing: 32px;
-    $s-spacing: 24px;
-    $xs-spacing: 16px;
-    $xxs-spacing: 8px;
-}
+$card-height: 670px;

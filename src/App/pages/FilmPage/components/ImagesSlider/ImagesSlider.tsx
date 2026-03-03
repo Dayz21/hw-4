@@ -1,6 +1,6 @@
 import { Image } from "@/components/Image";
 import { Swiper, SwiperSlide } from "swiper/react";
-import { BackControlButton, FrontControlButton } from "../ControlButtons";
+import { BackControlButton, FrontControlButton } from "@/components/CarouselControls";
 import { useRef } from "react";
 import type { Swiper as SwiperType } from "swiper";
 
@@ -43,7 +43,7 @@ export const ImagesSlider: React.FC<ImagesSliderProps> = ({ images, className })
                         </SwiperSlide>
                     ))
                     :
-                    Array(3).fill(0).map((_, index) => (
+                    Array(6).fill(0).map((_, index) => (
                         <SwiperSlide key={index}>
                             <div className={styles.image_skeleton} />
                         </SwiperSlide>
